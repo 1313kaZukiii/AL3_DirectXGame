@@ -15,7 +15,19 @@
 /// ゲームシーン
 /// </summary>
 class GameScene {
- 
+  public:
+	  //
+	  enum PartID {
+		  Root,		//大元
+		  Spine,	//脊椎
+		  Chest,	//胸
+		  Head,		//頭
+		  ArmL,		//左腕
+		  ArmR,		//右腕
+		  Hip,		//尻
+		  LegL,		//左脚
+		  LegR,		//右脚
+	};
 
 
   public: // メンバ関数
