@@ -44,12 +44,17 @@ void GameScene::Initialize() {
 		// X,Y,Z軸回りの回転角を設定
 		worldTransform_[i].rotation_ = {rotDist(engine), rotDist(engine), rotDist(engine)};
 
-		// X,Y,Z軸回りの平行移動を設定
-		worldTransform_[i].translation_ = {posDist(engine), posDist(engine), posDist(engine)};
+		//親(0番)
+		worldTransform_[0].Initialize();
 
+		//子(1番)
+		// X,Y,Z軸回りの平行移動を設定
+		worldTransform_[1].translation_ = {0, 4.5f, 0};
+
+		worldTransform_[1].parent_ = &worldTransform_[0];
 
 		//ワールドトランスフォームの初期化
-		worldTransform_[i].Initialize();
+		worldTransform_[1].Initialize();
 	}
 
 	//カメラ視点座標を設定
@@ -58,8 +63,11 @@ void GameScene::Initialize() {
 	//カメラ注視点座標を設定
 	viewProjection_.target = {10, 0, 0};
 
-	//
+	//カメラ上方向ベクトルを設定(右上45度指定)
 	viewProjection_.up = {cosf(XM_PI / 4.0f), sinf(XM_PI / 4.0f), 0.0f};
+
+	//カメラ垂直方向視野角を設定
+	viewProjection_.fovAngleY = XMConvertToRadians(40.0f);
 
 	//ビュープロジェクションの初期化
 	viewProjection_.Initialize();
@@ -148,6 +156,26 @@ void GameScene::Update() {
 		debugText_->Printf(
 		  "up:(%f,%f,%f)", viewProjection_.up.x, viewProjection_.up.y, viewProjection_.up.z);
 	}
+
+	//FoV変更処理
+	{
+		//↑キーで視野角が広がる
+		if (input_->PushKey(DIK_UP)) {
+			viewProjection_.fovAngleY += 0.01f;
+			viewProjection_.fovAngleY = min(viewProjection_.fovAngleY, XM_PI);
+			//↓キーで視野角が狭まる
+		} else if (input_->PushKey(DIK_DOWN)) {
+			viewProjection_.fovAngleY -= 0.01f;
+			viewProjection_.fovAngleY = max(viewProjection_.fovAngleY, 0.01f);
+		}
+	}
+
+	//行列の再計算
+	viewProjection_.UpdateMatrix();
+
+	//デバッグ用表示
+	debugText_->SetPos(50, 110);
+	debugText_->Printf("fovAngleY(Degree):%f", XMConvertToDegrees(viewProjection_.fovAngleY));
 }
 
 void GameScene::Draw() {
